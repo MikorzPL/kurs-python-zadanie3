@@ -26,3 +26,11 @@ class DzienTygodnia(Enum):
 class PoraDnia(Enum):
     RANO = 1
     WIECZOR = 2
+
+class TrybPracy(Enum):
+    TWORZENIE = 1
+    ODCZYT = 2
+
+class FormatPliku(Enum):
+    CSV = 1
+    JSON = 2
