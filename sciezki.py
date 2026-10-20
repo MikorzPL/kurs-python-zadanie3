@@ -38,7 +38,10 @@ def stworz_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], 
         pelna_nazwa_pliku = DOMYSLNA_NAZWA_PLIKU + "." + format_pliku.pelna_nazwa
         plik = sciezka / pelna_nazwa_pliku
         plik.mkdir(parents=True, exist_ok=True)
-        
+
+        if plik.exists():
+            continue
+
         tworz_plik(plik, format_pliku)
 
 def czytaj_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], format_pliku: FormatPliku) -> None:
