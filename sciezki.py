@@ -1,5 +1,10 @@
+from dane import tworz_plik
+from dane import czytaj_plik
 from typy import Miesiac, DzienTygodnia, PoraDnia, TrybPracy, FormatPliku
 from typing import List, Tuple
+from pathlib import Path
+
+DOMYSLNA_NAZWA_PLIKU: str = "Dane"
 
 def obsluguj_sciezki(
     dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]],
@@ -17,4 +22,43 @@ def obsluguj_sciezki(
     Wynikiem funkcji jest wywołanie odpowiednich funkcji generowania/odczytywania plików z dane.py w podanych lokalizacjach.
     Dodatkowo jeśli tryb_pracy == ODCZYT funkcja sumuje i podaje wynik odczytu dla kolejnych plików z zapytania.
     """
-    pass
+
+    if tryb_pracy == TrybPracy.TWORZENIE:
+        stworz_pliki_z_wejscia(dane, format_pliku)
+    else:
+        czytaj_pliki_z_wejscia(dane, format_pliku)
+
+def krotka_na_sciezke(krotka: Tuple[Miesiac, DzienTygodnia, PoraDnia]) -> Path:
+    return Path(".") / krotka[0] / krotka[1] / krotka[2]
+
+
+def stworz_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], format_pliku: FormatPliku) -> None:
+    for k in dane:
+        sciezka = krotka_na_sciezke(k)
+        pelna_nazwa_pliku = DOMYSLNA_NAZWA_PLIKU + "." + format_pliku.pelna_nazwa
+        plik = sciezka / pelna_nazwa_pliku
+        plik.mkdir(parents=True, exist_ok=True)
+        
+        tworz_plik(plik, format_pliku)
+
+def czytaj_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], format_pliku: FormatPliku) -> None:
+    for k in dane:
+        sciezka = krotka_na_sciezke(k)
+        pelna_nazwa_pliku = DOMYSLNA_NAZWA_PLIKU + "." + format_pliku.pelna_nazwa
+        plik = sciezka / pelna_nazwa_pliku
+        
+        if not plik.exists():
+            # pliki, których nie ma są ignorowane
+            # można zmienić
+            print(f'Plik: {plik} nie istnieje i zostanie zignorowany')
+            continue
+
+        wynik = czytaj_plik(plik, format_pliku)
+        obsluz_wynik(wynik, plik)
+
+
+def obsluz_wynik(wynik: int, sciezka_do_pliku: Path) -> None:
+    """
+    Funkcja wypisuje wynik dla pliku. Można potencjalnie zastąpić np: zapisem do logów.
+    """
+    print(f'Dla pliku: {sciezka_do_pliku}  {wynik=}')
