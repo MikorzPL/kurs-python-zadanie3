@@ -1,36 +1,42 @@
-from enum import Enum
+from typing import Literal
+from enum import StrEnum
 
-class Miesiac(Enum):
-    STYCZEN = 1
-    LUTY = 2
-    MARZEC = 3
-    KWIECIEN = 4
-    MAJ = 5
-    CZERWIEC = 6
-    LIPIEC = 7
-    SIERPIEN = 8
-    WRZESIEN = 9
-    PAZDZIERNIK = 10
-    LISTOPAD = 11
-    GRUDZIEN =  12
+class Miesiac(StrEnum):
+    STYCZEN = "styczeń"
+    LUTY = "luty"
+    MARZEC = "marzec"
+    KWIECIEN = "kwiecień"
+    MAJ = "maj"
+    CZERWIEC = "czerwiec"
+    LIPIEC = "lipiec"
+    SIERPIEN = "sierpień"
+    WRZESIEN = "wrzesień"
+    PAZDZIERNIK = "październik"
+    LISTOPAD = "listopad"
+    GRUDZIEN =  "grudzień"
     
-class DzienTygodnia(Enum):
-    PONIEDZIALEK = 1
-    WTOREK = 2
-    SRODA = 3
-    CZWARTEK = 4
-    PIATEK = 5
-    SOBOTA = 6
-    NIEDZIELA = 7
+class DzienTygodnia(StrEnum):
+    PONIEDZIALEK = "pn"
+    WTOREK = "wt"
+    SRODA = "śr"
+    CZWARTEK = "czw"
+    PIATEK = "pt"
+    SOBOTA = "sb"
+    NIEDZIELA = "nd"
 
-class PoraDnia(Enum):
-    RANO = 1
-    WIECZOR = 2
 
-class TrybPracy(Enum):
-    TWORZENIE = 1
-    ODCZYT = 2
+class PoraDnia(StrEnum):
+    RANO = "r"
+    WIECZOR = "w"
 
-class FormatPliku(Enum):
-    CSV = 1
-    JSON = 2
+class TrybPracy(StrEnum):
+    TWORZENIE = "t"
+    ODCZYT = "o"
+
+class FormatPliku(StrEnum):
+    CSV = "c"
+    JSON = "j"
+
+    @property
+    def pelna_nazwa(self) -> Literal['csv', 'json']:
+        return "json" if self.value == "json" else "csv"
