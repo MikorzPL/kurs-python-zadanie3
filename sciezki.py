@@ -29,7 +29,7 @@ def obsluguj_sciezki(
         czytaj_pliki_z_wejscia(dane, format_pliku)
 
 def krotka_na_sciezke(krotka: Tuple[Miesiac, DzienTygodnia, PoraDnia]) -> Path:
-    return Path(".") / krotka[0] / krotka[1] / krotka[2]
+    return Path(".") / krotka[0].pelna_nazwa / krotka[1].pelna_nazwa / krotka[2].pelna_nazwa
 
 
 def stworz_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], format_pliku: FormatPliku) -> None:
