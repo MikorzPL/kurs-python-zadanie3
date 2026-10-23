@@ -39,4 +39,4 @@ class FormatPliku(StrEnum):
 
     @property
     def pelna_nazwa(self) -> Literal['csv', 'json']:
-        return "json" if self.value == "json" else "csv"
+        return "json" if self.value == "j" else "csv"
