@@ -27,14 +27,15 @@ def czytaj_csv(sciezka: Path) -> int:
     """
 
     with open(sciezka, newline="", encoding="utf-8") as plik:
-        reader = csv.reader(plik, delimiter=";")
-        wiersze = list(reader)
+        reader = csv.DictReader(plik, delimiter=";")
 
-        model = wiersze[1][0].strip()
-        czas = wiersze[1][2].strip().removesuffix("s")
+        for wiersz in reader:
+            model = wiersz["Model"].strip()
+            czas = wiersz["Czas"].strip().removesuffix("s")
 
-        if model == "A":
-            return int(czas)
+            if model == "A":
+                return int(czas)
+
         return 0
 
 def odczytaj_dane_z_json(sciezka: Path) -> Dict[str, int | str]:
@@ -61,7 +62,7 @@ def wygeneruj_dane() -> Dict[str, int | str]:
     return{
         "Model": random.choice(["A", "B", "C"]),
         "Wynik": random.randint(0, 1000),
-        "Czas": random.randint(0, 1000)
+        "Czas": str(random.randint(0, 1000)) + "s"
     }
 
 def tworz_plik(sciezka: Path, format_pliku: FormatPliku) -> None:
@@ -95,17 +96,18 @@ def zapisz_dane_do_csv(sciezka: Path, dane: Dict[str, int | str]) -> None:
     path = Path(sciezka)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, "w", newline="", encoding='utf-8') as f:
-        writer = csv.writer(
-            f,
-            delimiter = ';',
-            lineterminator="\n"
+    with open(path, "w", newline="", encoding='utf-8') as plik:
+
+        pola = ["Model", "Wynik", "Czas"]
+
+        writer = csv.DictWriter(
+            plik,
+            fieldnames=pola,
+            delimiter=";"
         )
 
-        writer.writerow(["Model", " Wynik", " Czas", " "])
-        writer.writerow([
-            dane["Model"] + " ", " " + str(dane["Wynik"]) + " ", " " + str(dane["Czas"]) +"s", ""
-        ])
+        writer.writeheader()
+        writer.writerow(dane)
 
 def zapisz_dane_do_json(sciezka: Path, dane: Dict[str, int | str]) -> None:
     dane["Czas"] = str(dane["Czas"]) + "s" # dodaj suffix s do generowanego słownika
