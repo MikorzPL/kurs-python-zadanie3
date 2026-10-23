@@ -80,7 +80,9 @@ def parsuj_argumenty():
 
     return lista_zapytan, args.tryb, args.format
 
-
-if __name__ == "__main__":
+def main():
     lista_zapytan, tryb_pracy, format_pliku = parsuj_argumenty()
     obsluguj_sciezki(lista_zapytan, tryb_pracy, format_pliku)
+
+if __name__ == "__main__":
+    main()
