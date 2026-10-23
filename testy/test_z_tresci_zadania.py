@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple, Dict
+from typing import Callable, List, Tuple, Dict
 from pyfakefs.fake_filesystem import FakeFilesystem
 import pytest
 from typy import Miesiac, DzienTygodnia, PoraDnia, TrybPracy, FormatPliku
 import csv
 import json
 from sciezki import obsluguj_sciezki
+from unittest.mock import Mock
 
 def dict_assert(rekord: Dict[str, str], file: Path, nr_rekordu: int) -> None:
         assert rekord["Model"] in {"A", "B", "C"}, (
@@ -47,35 +48,65 @@ def json_assert(file: Path) -> None:
         assert list(rekord) == ["Model", "Wynik", "Czas"]
         dict_assert(rekord, file, 1)
 
+def stworz_json(file: Path) -> None:
+    file.write_text('{"Model": "A", "Wynik": 17, "Czas": "465s"}', encoding="utf-8")
+
+def stworz_csv(file: Path) -> None:
+    file.write_text("Model;Wynik;Czas\nA;17;465s", encoding="utf-8")
+
 @pytest.fixture
-def sciezki_przyklad() -> List[Tuple[Miesiac, DzienTygodnia, PoraDnia]]:
+def dane_przyklad() -> List[Tuple[Miesiac, DzienTygodnia, PoraDnia]]:
     return [
         (Miesiac.STYCZEN, DzienTygodnia.PONIEDZIALEK, PoraDnia.RANO),
         (Miesiac.STYCZEN, DzienTygodnia.WTOREK, PoraDnia.WIECZOR),
         (Miesiac.LUTY, DzienTygodnia.PIATEK, PoraDnia.RANO),
     ]
 
-@pytest.mark.parametrize("funkcja_formatu, format", [
-    (csv_assert, FormatPliku.CSV),
-    (json_assert, FormatPliku.JSON),
-])
-def test_sciezek_tworzenie(
-    fs: FakeFilesystem,
-    sciezki_przyklad: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]],
-    funkcja_formatu: Callable[[Path], None],
-    format: FormatPliku
-    ):
-    tryb = TrybPracy.TWORZENIE
-    obsluguj_sciezki(sciezki_przyklad, tryb, format)
-    sciezki = [
+
+@pytest.fixture
+def sciezki_przyklad() -> List[Path]:
+    return [
         Path(".") / "Styczeń" / "poniedziałek" / "rano",
         Path(".") / "Styczeń" / "wtorek" / "wieczorem",
         Path(".") / "Luty" / "piątek" / "rano",
     ]
 
-    for i in range(len(sciezki)):
-        sciezki[i] /= "Dane." + format.pelna_nazwa
 
+@pytest.mark.parametrize("assert_formatu, format", [
+    (csv_assert, FormatPliku.CSV),
+    (json_assert, FormatPliku.JSON),
+])
+def test_sciezek_tworzenie(
+    fs: FakeFilesystem,
+    dane_przyklad: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]],
+    assert_formatu: Callable[[Path], None],
+    format: FormatPliku,
+    sciezki_przyklad: List[Path]
+    ):
+    tryb = TrybPracy.TWORZENIE
+    obsluguj_sciezki(dane_przyklad, tryb, format)
+    sciezki = [sciezka / ("Dane." + format.pelna_nazwa) for sciezka in sciezki_przyklad]
     for path in sciezki:
         assert path.exists(), f"Plik {path} nie istnieje"
-        funkcja_formatu(path)
+        assert_formatu(path)
+
+@pytest.mark.parametrize("funkcja_tworzaca_format, format", [
+    (stworz_csv, FormatPliku.CSV),
+    (stworz_json, FormatPliku.JSON),
+])
+def test_sciezek_odczyt(
+    fs: FakeFilesystem,
+    funkcja_tworzaca_format: Callable[[Path], None],
+    format: FormatPliku,
+    sciezki_przyklad: List[Path],
+    dane_przyklad: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]]
+    ):
+    sciezki = [sciezka / ("Dane." + format.pelna_nazwa) for sciezka in sciezki_przyklad]
+    for sciezka in sciezki:
+        fs.create_file(sciezka)
+        funkcja_tworzaca_format(sciezka)
+    
+    mock_zapisz = Mock()
+    obsluguj_sciezki(dane_przyklad, TrybPracy.ODCZYT, format, mock_zapisz)
+    poprawny_wynik = 465 * len(sciezki)
+    mock_zapisz.assert_called_once_with(poprawny_wynik)

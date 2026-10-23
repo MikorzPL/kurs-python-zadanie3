@@ -110,6 +110,5 @@ def zapisz_dane_do_csv(sciezka: Path, dane: Dict[str, int | str]) -> None:
         writer.writerow(dane)
 
 def zapisz_dane_do_json(sciezka: Path, dane: Dict[str, int | str]) -> None:
-    dane["Czas"] = str(dane["Czas"]) + "s" # dodaj suffix s do generowanego słownika
     with open(sciezka, "w", encoding="utf-8") as plik:
         json.dump(dane, plik)

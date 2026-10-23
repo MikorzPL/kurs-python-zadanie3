@@ -1,15 +1,24 @@
 from dane import tworz_plik
 from dane import czytaj_plik
 from typy import Miesiac, DzienTygodnia, PoraDnia, TrybPracy, FormatPliku
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 from pathlib import Path
 
 DOMYSLNA_NAZWA_PLIKU: str = "Dane"
 
+
+def obsluz_wynik(wynik: int) -> None:
+    """
+    Funkcja wypisuje wynik dla pliku. Można potencjalnie zastąpić np: zapisem do logów.
+    """
+    print(f'Suma czasu modeli "A": {wynik=}')
+
+
 def obsluguj_sciezki(
     dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]],
     tryb_pracy: TrybPracy,
-    format_pliku: FormatPliku
+    format_pliku: FormatPliku,
+    obsluz_wynik: Callable[[int], None] = obsluz_wynik
 ) -> None:
     """
     Parametry: 
@@ -26,7 +35,8 @@ def obsluguj_sciezki(
     if tryb_pracy == TrybPracy.TWORZENIE:
         stworz_pliki_z_wejscia(dane, format_pliku)
     else:
-        czytaj_pliki_z_wejscia(dane, format_pliku)
+        wynik = czytaj_pliki_z_wejscia(dane, format_pliku)
+        obsluz_wynik(wynik)
 
 def krotka_na_sciezke(krotka: Tuple[Miesiac, DzienTygodnia, PoraDnia]) -> Path:
     return Path(".") / krotka[0].pelna_nazwa / krotka[1].pelna_nazwa / krotka[2].pelna_nazwa
@@ -45,7 +55,7 @@ def stworz_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], 
 
         tworz_plik(plik, format_pliku)
 
-def czytaj_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], format_pliku: FormatPliku) -> None:
+def czytaj_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], format_pliku: FormatPliku) -> int:
     wynik = 0
 
     for k in dane:
@@ -61,11 +71,4 @@ def czytaj_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], 
 
         wynik += czytaj_plik(plik, format_pliku)
         
-    obsluz_wynik(wynik)
-
-
-def obsluz_wynik(wynik: int) -> None:
-    """
-    Funkcja wypisuje wynik dla pliku. Można potencjalnie zastąpić np: zapisem do logów.
-    """
-    print(f'Suma czasu modeli "A": {wynik=}')
+    return wynik
