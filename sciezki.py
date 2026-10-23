@@ -35,9 +35,10 @@ def krotka_na_sciezke(krotka: Tuple[Miesiac, DzienTygodnia, PoraDnia]) -> Path:
 def stworz_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], format_pliku: FormatPliku) -> None:
     for k in dane:
         sciezka = krotka_na_sciezke(k)
+        sciezka.mkdir(parents=True, exist_ok=True)
+
         pelna_nazwa_pliku = DOMYSLNA_NAZWA_PLIKU + "." + format_pliku.pelna_nazwa
         plik = sciezka / pelna_nazwa_pliku
-        plik.mkdir(parents=True, exist_ok=True)
 
         if plik.exists():
             continue
@@ -45,6 +46,8 @@ def stworz_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], 
         tworz_plik(plik, format_pliku)
 
 def czytaj_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], format_pliku: FormatPliku) -> None:
+    wynik = 0
+
     for k in dane:
         sciezka = krotka_na_sciezke(k)
         pelna_nazwa_pliku = DOMYSLNA_NAZWA_PLIKU + "." + format_pliku.pelna_nazwa
@@ -56,12 +59,13 @@ def czytaj_pliki_z_wejscia(dane: List[Tuple[Miesiac, DzienTygodnia, PoraDnia]], 
             print(f'Plik: {plik} nie istnieje i zostanie zignorowany')
             continue
 
-        wynik = czytaj_plik(plik, format_pliku)
-        obsluz_wynik(wynik, plik)
+        wynik += czytaj_plik(plik, format_pliku)
+        
+    obsluz_wynik(wynik)
 
 
-def obsluz_wynik(wynik: int, sciezka_do_pliku: Path) -> None:
+def obsluz_wynik(wynik: int) -> None:
     """
     Funkcja wypisuje wynik dla pliku. Można potencjalnie zastąpić np: zapisem do logów.
     """
-    print(f'Dla pliku: {sciezka_do_pliku}  {wynik=}')
+    print(f'Suma czasu modeli "A": {wynik=}')
